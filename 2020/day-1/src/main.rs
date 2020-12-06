@@ -5,7 +5,7 @@ extern crate common;
 const DEBUG: bool = false;
 
 fn main(){
-    debug_log("Day 1!");
+    println!("Day 1!");
 
     debug_log("Getting input...");
     let input = common::read_input("./input.txt");
