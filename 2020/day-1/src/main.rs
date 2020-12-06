@@ -1,42 +1,76 @@
-use std::fs::File;
-use std::io::{self, BufRead};
-use std::path::Path;
+use std::fs;
 
-use io::Result;
-use io::Lines;
-use io::BufReader;
-
-const DEBUG: bool = true;
+const DEBUG: bool = false;
 
 fn main(){
     debug_log("Day 1!");
 
     debug_log("Getting input...");
-    let input: vec![] = read_lines("./input.txt");
-    input.iter();
-    debug_log("Getting input..."); 
+    let input = read_input("./input.txt");
+    let input_lines = input.lines().collect::<Vec<&str>>();
+    debug_log(&format!("Number of lines: {}", input_lines.len())); 
+    
+    debug_log("Searching pair of numbers...");
+    let pair = find_pair(&input_lines, 2020);
+    let (first, second) = pair;
+    debug_log(&format!("Found: {}, {}", first, second)); 
 
-    let result: u32 = calculate(input);
-    println!("Result: {}", result);    
+    println!("Result (part1): {}", first * second); 
+    
+    debug_log("Searching pair of numbers...");
+    let triple = find_triple(input_lines, 2020);
+    let (first, second, third) = triple;
+    debug_log(&format!("Found: {}, {}, {}", first, second, third)); 
+
+    println!("Result (part2): {}", first * second * third);  
 }
 
-fn calculate(_input: Result<Lines<BufReader<File>>>) -> u32{    
+fn find_pair(input_lines: &Vec<&str>, expected_sum: u32) -> (u32, u32) {
+    let mut number_lines: Vec<u32> = input_lines.iter()
+        .map(|x| x.parse::<u32>().unwrap())
+        .collect();
 
-    return 2020;
+    for i in 0..number_lines.len() {
+        for j in i..number_lines.len() {
+            // debug_log(&format!("Checking {}=>{}, {}=>{}, sum={}", i, number_lines[i], j, number_lines[j], number_lines[i] + number_lines[j])); 
+            if number_lines[i] + number_lines[j] == expected_sum
+            && i!=j {
+                return (number_lines[i], number_lines[j]);
+            }
+        }
+    }
+    panic!("No two numbers match expected value!");
 }
+
+fn find_triple(input_lines: Vec<&str>, expected_sum: u32) -> (u32, u32, u32) {
+    let mut number_lines: Vec<u32> = input_lines.iter()
+        .map(|x| x.parse::<u32>().unwrap())
+        .collect();
+
+    for i in 0..number_lines.len() {
+        for j in i..number_lines.len() {
+            for k in j..number_lines.len() {
+                if number_lines[i] + number_lines[j] + number_lines[k] == expected_sum
+                && (i!=k && i!=j && k!=j) {
+                    return (number_lines[i], number_lines[j], number_lines[k]);
+                }
+            }
+        }
+    }    
+    panic!("No three numbers match expected value!");
+}
+
+
 
 // TODO 2 common
 fn debug_log(str: &str) {
     if DEBUG {println!("{}", str)};
 }
 
-// TODO 2 common
-// The output is wrapped in a Result to allow matching on errors
-// Returns an Iterator to the Reader of the lines of the file.
-fn read_lines(filename: &str) -> vec![] {
-    let mut array = vec![];
-    let mut file = File::open(filename);
-    let lines: Lines<BufReader<File>> = BufReader::new(file).lines();
-    array = lines.collect();
-    return array;
+fn read_input(filename:&str) -> String {
+    debug_log(&format!("Reading file {}.", filename));
+    let contents = fs::read_to_string(filename)
+        .expect("Something went wrong with reading the file!");
+    // debug_log(&format!("Contents:\n{}", contents));
+    return contents;
 }
