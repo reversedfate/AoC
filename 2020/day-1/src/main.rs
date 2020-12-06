@@ -1,12 +1,14 @@
 use std::fs;
 
+extern crate common;
+
 const DEBUG: bool = false;
 
 fn main(){
     debug_log("Day 1!");
 
     debug_log("Getting input...");
-    let input = read_input("./input.txt");
+    let input = common::read_input("./input.txt");
     let input_lines = input.lines().collect::<Vec<&str>>();
     debug_log(&format!("Number of lines: {}", input_lines.len())); 
     
@@ -60,17 +62,6 @@ fn find_triple(input_lines: Vec<&str>, expected_sum: u32) -> (u32, u32, u32) {
     panic!("No three numbers match expected value!");
 }
 
-
-
-// TODO 2 common
-fn debug_log(str: &str) {
+pub fn debug_log(str: &str) {
     if DEBUG {println!("{}", str)};
-}
-
-fn read_input(filename:&str) -> String {
-    debug_log(&format!("Reading file {}.", filename));
-    let contents = fs::read_to_string(filename)
-        .expect("Something went wrong with reading the file!");
-    // debug_log(&format!("Contents:\n{}", contents));
-    return contents;
 }
