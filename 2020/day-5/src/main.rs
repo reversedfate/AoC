@@ -97,7 +97,7 @@ fn find_largest_index(input_lines: &Vec<&str>) -> u32 {
         let position = instructions_to_position(input_lines[i]);
         let index = position_to_index(position);
         let (x, y) = position;
-        // debug_log(&format!("Checking instructions {}, which corresponds to position [{},{}] and index {}", input_lines[i], x, y, index));
+        debug_log(&format!("Checking instructions {}, which corresponds to position [{},{}] and index {}", input_lines[i], x, y, index));
         if index > largest_index {
             largest_index = index;
         } 

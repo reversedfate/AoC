@@ -54,11 +54,11 @@ fn is_password_valid(password: &str, policy: &str) -> bool{
 
     let mut ch_count = 0;
     for password_char in password.chars() {
-        if (password_char == ch) {
+        if password_char == ch {
             ch_count += 1;
         }
     } 
-    let valid: bool = (ch_count >= min && ch_count <= max);
+    let valid: bool = ch_count >= min && ch_count <= max;
 
     // debug_log(&format!("Checking if password {} works with policy [ch={},min={},max={}]. Character {} appears {} times, and thus it is {}", password, ch, min, max, ch, ch_count, if (valid) {"valid"} else {"invalid"}));
 
@@ -74,10 +74,10 @@ fn is_password_valid_2(password: &str, policy: &str) -> bool{
     let mut ch_count = 0;
     let password_chars: Vec<char> = password.chars().collect();
     
-    if ((pos1 as usize) < password_chars.len() && password_chars[pos1 as usize] == ch) { ch_count+=1 };
-    if ((pos2 as usize) < password_chars.len() && password_chars[pos2 as usize] == ch) { ch_count+=1 };
+    if (pos1 as usize) < password_chars.len() && password_chars[pos1 as usize] == ch { ch_count+=1 };
+    if (pos2 as usize) < password_chars.len() && password_chars[pos2 as usize] == ch { ch_count+=1 };
     
-    let valid: bool = (ch_count == 1);
+    let valid: bool = ch_count == 1;
     
     return valid;
 }
