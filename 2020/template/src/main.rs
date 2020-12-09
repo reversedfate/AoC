@@ -17,3 +17,13 @@ fn main() {
 fn debug_log(str: &str) {
     if DEBUG {println!("{}", str)};
 }
+
+#[cfg(test)]
+mod tests {
+    // use crate::*;
+
+    #[test]
+    fn hello_test() {
+        assert_eq!(2+2, 4);
+    }
+}
