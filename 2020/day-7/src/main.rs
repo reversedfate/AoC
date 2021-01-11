@@ -1,4 +1,5 @@
 use petgraph::graph::Graph;
+use petgraph::Outgoing;
 use petgraph::Directed;
 use petgraph::algo::has_path_connecting;
 use petgraph::dot::Dot;
@@ -21,11 +22,13 @@ fn main() {
     // find out what nodes can lead to "shiny gold"
     let target_node_name = "shiny gold";
     let count = target_bag_can_be_contained_in(target_node_name, &bag_graph);
+    let count2 = how_many_bags_bag_contains(target_node_name, &bag_graph);
 
     println!("Answer (part 1) = {}", count);
-    println!("Answer (part 2) = {}", 0);
+    println!("Answer (part 2) = {}", count2);
 }
 
+// part 1
 fn target_bag_can_be_contained_in(target_node_name: &str, bag_graph: &Graph<String, u32, Directed>) -> u32 {
     let mut count : u32 = 0;
     
@@ -53,6 +56,29 @@ fn target_bag_can_be_contained_in(target_node_name: &str, bag_graph: &Graph<Stri
     return count;
 }
 
+// part 2
+fn how_many_bags_bag_contains(target_node_name: &str, bag_graph: &Graph<String, u32, Directed>) -> u32 {
+    if !bag_graph.node_indices().any(|j| bag_graph[j]==target_node_name) {
+        debug_log(&format!("Graph does not contain target node '{}'!", target_node_name));
+        return 0;
+    }
+    let target_node_index = bag_graph.node_indices().find(|i| bag_graph[*i] == target_node_name).unwrap();
+    return how_many_bags_bag_contains_recursive(target_node_index, &bag_graph);
+}
+
+
+fn how_many_bags_bag_contains_recursive(target_node_index: petgraph::prelude::NodeIndex, bag_graph: &Graph<String, u32, Directed>) -> u32 {
+    let mut count = 0;
+
+    let mut edges = bag_graph.neighbors_directed(target_node_index, Outgoing).detach();
+    while let Some(edge) = edges.next_edge(&bag_graph) {
+        let (from_node, to_node) = bag_graph.edge_endpoints(edge).unwrap();
+        count += bag_graph[edge] * (1 + how_many_bags_bag_contains_recursive(to_node, &bag_graph));
+    }
+
+    return count;
+}
+ 
 fn input_to_graph<'a>(input_lines: &'a Vec<&'a str>, bag_graph: &'a mut Graph<String, u32>) {
     let regex_main_bag: Regex = Regex::new(r"^(.+) bags contain").unwrap();
     let regex_child_bags: Regex = Regex::new(r"(?P<number>[0-9]+) (?P<name>.+?) bag").unwrap();
@@ -105,11 +131,13 @@ mod tests {
         input_to_graph(&input_lines, &mut bag_graph);
         
         let target_node_name = "shiny gold";
-        let count = target_bag_can_be_contained_in(target_node_name, &bag_graph);
+        let count_in_types = target_bag_can_be_contained_in(target_node_name, &bag_graph);
+        let count_must_contain = how_many_bags_bag_contains(target_node_name, &bag_graph);
 
         assert_eq!(bag_graph.node_count(), 0);
         assert_eq!(bag_graph.edge_count(), 0);        
-        assert_eq!(count, 0);
+        assert_eq!(count_in_types, 0);
+        assert_eq!(count_must_contain, 0);
     }
 
     #[test]
@@ -121,30 +149,53 @@ mod tests {
         input_to_graph(&input_lines, &mut bag_graph);
         
         let target_node_name = "shiny gold";
-        let count = target_bag_can_be_contained_in(target_node_name, &bag_graph);
+        let count_in_types = target_bag_can_be_contained_in(target_node_name, &bag_graph);
+        let count_must_contain = how_many_bags_bag_contains(target_node_name, &bag_graph);
 
         assert_eq!(bag_graph.node_count(), 2);
         assert_eq!(bag_graph.edge_count(), 1);        
-        assert_eq!(count, 1);        
+        assert_eq!(count_in_types, 1);
+        assert_eq!(count_must_contain, 0);        
     }
     
     #[test]
     fn more_complex_case() {
         let mut input = "A bags contain 1 shiny gold bag.".to_owned();
         input.push_str("\nB bags contain 111 A bags and 222 shiny gold bags.");
-        .push_str("\nC bags contain 1111 shiny gold bags.");
-        .push_str("\nshiny gold bags contain 2 D bags.");
+        input.push_str("\nC bags contain 1111 shiny gold bags.");
+        input.push_str("\nshiny gold bags contain 2 D bags.");
 
         let input_lines = input.lines().collect::<Vec<&str>>();
         let mut bag_graph : Graph<String, u32, Directed> = Graph::new();
         input_to_graph(&input_lines, &mut bag_graph);
         
         let target_node_name = "shiny gold";
-        let count = target_bag_can_be_contained_in(target_node_name, &bag_graph);
+        let count_in_types = target_bag_can_be_contained_in(target_node_name, &bag_graph);
+        let count_must_contain = how_many_bags_bag_contains(target_node_name, &bag_graph);
 
         assert_eq!(bag_graph.node_count(), 5);
         assert_eq!(bag_graph.edge_count(), 5);        
-        assert_eq!(count, 3);        
+        assert_eq!(count_in_types, 3);
+        assert_eq!(count_must_contain, 2);        
     }
 
+    #[test]
+    fn recursive_case() {
+        let mut input = "shiny gold bags contain 2 A bags and 3 B bags.".to_owned();
+        input.push_str("\nB bags contain 5 A bags and 2 C bags.");
+        input.push_str("\nC bags contain 1111 D bags.");
+
+        let input_lines = input.lines().collect::<Vec<&str>>();
+        let mut bag_graph : Graph<String, u32, Directed> = Graph::new();
+        input_to_graph(&input_lines, &mut bag_graph);
+        
+        let target_node_name = "shiny gold";
+        let count_in_types = target_bag_can_be_contained_in(target_node_name, &bag_graph);
+        let count_must_contain = how_many_bags_bag_contains(target_node_name, &bag_graph);
+
+        assert_eq!(bag_graph.node_count(), 5);
+        assert_eq!(bag_graph.edge_count(), 5);        
+        assert_eq!(count_in_types, 0);
+        assert_eq!(count_must_contain, 2+2*(0) + 3+3*(5+5*(0) + 2+2*(1111)));    
+    }
 }
