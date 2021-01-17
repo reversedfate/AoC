@@ -14,12 +14,17 @@ fn main() {
 
     let (answer1, found1) = find_first_invalid_number(&input_lines, 25);
 
-    if found1 
-    { println!("Answer (part 1) = {}", answer1); }
-    else 
-    { println!("No answer for part 1!"); }
-
-    println!("Answer (part 2) = {}", 0);
+    if found1 {
+        println!("Answer (part 1) = {}", answer1); 
+        let (answer2, found2) = get_answer_for_part2(answer1, &input_lines); 
+        if found2 {
+            println!("Answer (part 2) = {}", answer2);
+        } else {
+            println!("No answer for part 1!");    
+        }
+    } else {
+        println!("No answer for part 1!"); 
+    }
 }
 
 fn can_sum_number_from_preamble(number: i64, preamble: Vec<i64>) -> bool {
@@ -34,6 +39,38 @@ fn can_sum_number_from_preamble(number: i64, preamble: Vec<i64>) -> bool {
         }    
     }
     return false;
+}
+
+fn get_answer_for_part2(number: i64, input_lines: &Vec<i64>) -> (i64, bool) {   
+    let (vector, found) = find_continious_numbers_that_sum_to(number, input_lines);
+    if found {
+        return (add_largest_and_smallest_number_in(vector), true);
+    } else {
+        return (0, false);
+    }
+}
+
+fn add_largest_and_smallest_number_in(vector: Vec<i64>) -> i64 {
+    let smallest = vector.iter().min().unwrap();
+    let largest = vector.iter().max().unwrap();
+    return smallest + largest;
+}
+
+fn find_continious_numbers_that_sum_to(number: i64, input_lines: &Vec<i64>) -> (Vec<i64>, bool) {
+    // any sequence that is at least 2 numbers long and sums to a particular number 
+    
+    for i in 0..input_lines.len() {
+        for j in i+1..input_lines.len() {
+            let potential_numbers = input_lines[i..=j].to_vec();
+            let sum:i64 = potential_numbers.iter().sum();
+            
+            if sum == number && potential_numbers.len() >= 2 {
+                return (potential_numbers, true);
+            }
+        }
+    }
+
+    return (vec![], false);
 }
 
 fn construct_preamble(index: usize, preamble_size: usize, input_lines: &Vec<i64>) -> Vec<i64> {
@@ -137,6 +174,45 @@ mod tests {
         assert_eq!(
             find_first_invalid_number(&vec![35,20,15,25,47,40,62,55,65,95,102,117,150,182,127,219,299,277,309,576], 5),
             (127, true)
+        );
+    }
+
+    #[test]
+    fn find_continious_numbers(){
+        // minimal case
+        assert_eq!(
+            find_continious_numbers_that_sum_to(6, &vec![1,2,3]),
+            (vec![1,2,3], true)
+        );
+        assert_eq!(
+            find_continious_numbers_that_sum_to(55, &(0..=10).collect()),
+            ((0..=10).collect(), true)
+        );
+
+        // at least 2 numbers
+        assert_eq!(
+            find_continious_numbers_that_sum_to(100, &vec![1,10,100]),
+            (vec![], false)
+        );
+    }
+
+    #[test]
+    fn add_largest_and_smallest_number(){
+        assert_eq!(
+            add_largest_and_smallest_number_in(vec![-45, 45]),
+            0
+        );
+        assert_eq!(
+            add_largest_and_smallest_number_in(vec![1, 2, 3]),
+            4
+        );
+        assert_eq!(
+            add_largest_and_smallest_number_in(vec![1, 1, 1]),
+            2
+        );
+        assert_eq!(
+            add_largest_and_smallest_number_in(vec![1]),
+            2
         );
     }
 }
