@@ -8,3 +8,6 @@ edition = "2018"
 
 [dependencies.common]
 path = "../common"
+
+[dependencies]
+petgraph = "0.5.1"
