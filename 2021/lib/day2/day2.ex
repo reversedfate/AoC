@@ -40,7 +40,7 @@ defmodule Day2 do
   def part2(inputString) do
     parsedInput = parseInput(inputString)
 
-    {finalDepth, finalHorizontalPosition, finalAngle} = Enum.reduce(parsedInput, {0, 0, 0},
+    {finalDepth, finalHorizontalPosition, _finalAngle} = Enum.reduce(parsedInput, {0, 0, 0},
     fn command, acc ->
       cond do
         elem(command, 0) == "forward" ->
