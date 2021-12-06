@@ -28,6 +28,6 @@ defmodule Aoc2021 do
 
   def day4 do
     str = elem(File.read("lib/day4/input.txt"), 1)
-    {Day3.part1(str), Day3.part2(str)}
+    {Day4.part1(str), Day4.part2(str)}
   end
 end

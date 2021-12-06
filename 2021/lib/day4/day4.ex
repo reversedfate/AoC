@@ -59,6 +59,19 @@ defmodule Day4 do
     length(winningRows) > 0 or length(winningColumns) > 0
   end
 
+  def sumOfAllUnpickedNumbers(bingoCard, currentNumbers) do
+    bingoCard
+    |> Enum.reduce(0, fn ({_x, v}, acc) ->
+      Enum.reduce(v, acc, fn ({_vx, y}, acc) ->
+        if Enum.member?(currentNumbers, y) do
+          acc
+        else
+          acc + y
+        end
+      end)
+    end)
+  end
+
   def findWinningBingoAndNumber(numbers, bingoCards, index) do
     currentNumbers = numbers
     |> Enum.slice(0..index)
@@ -66,25 +79,42 @@ defmodule Day4 do
     winningBingoCards = bingoCards
     |> Enum.filter(fn e -> hasBingoWon(e, currentNumbers) end)
 
-    # winningBingoCards = [1]
-
     if length(winningBingoCards) == 1 do
-      {Enum.at(winningBingoCards, 0), index}
+      {Enum.at(winningBingoCards, 0), currentNumbers |> Enum.reverse |> hd, sumOfAllUnpickedNumbers(Enum.at(winningBingoCards, 0), currentNumbers)}
     else
       findWinningBingoAndNumber(numbers, bingoCards, index+1)
     end
   end
 
+  def findLastWinningBingoAndNumber(numbers, bingoCards, index) do
+    currentNumbers = numbers
+    |> Enum.slice(0..index)
+
+    winningBingoCards = bingoCards
+    |> Enum.filter(fn e -> hasBingoWon(e, currentNumbers) end)
+
+    notWinningBingoCards = bingoCards
+    |> Enum.reject(fn e -> hasBingoWon(e, currentNumbers) end)
+
+    if length(winningBingoCards) == 1 and length(notWinningBingoCards) == 0 do
+      {Enum.at(winningBingoCards, 0), currentNumbers |> Enum.reverse |> hd, sumOfAllUnpickedNumbers(Enum.at(winningBingoCards, 0), currentNumbers)}
+    else
+      findLastWinningBingoAndNumber(numbers, notWinningBingoCards, index+1)
+    end
+  end
 
   def part1(inputString) do
     {numbers, bingoCards} = parseInput(inputString)
 
-    0
+    {_, winningNumber, winningUnusedSum} = findWinningBingoAndNumber(numbers, bingoCards, 0)
+    winningNumber * winningUnusedSum
   end
 
   def part2(inputString) do
     {numbers, bingoCards} = parseInput(inputString)
-    0
+
+    {_, winningNumber, winningUnusedSum} = findLastWinningBingoAndNumber(numbers, bingoCards, 0)
+    winningNumber * winningUnusedSum
   end
 
 end
