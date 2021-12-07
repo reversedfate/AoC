@@ -30,10 +30,10 @@ defmodule Day5 do
       yRange = Enum.at(yPositions, 0)..Enum.at(yPositions, 1)
       yRangeList = yRange |> Enum.to_list()
 
-      acc = Enum.reduce(xRangeList, acc, fn x, acc ->
+      Enum.reduce(xRangeList, acc, fn x, acc ->
         Enum.reduce(yRangeList, acc, fn y, acc ->
           key = {x,y}
-          acc = Map.put(acc, key, Map.get(acc, key, 0) + 1)
+          Map.put(acc, key, Map.get(acc, key, 0) + 1)
         end)
       end)
     end)
@@ -64,7 +64,7 @@ defmodule Day5 do
 
       positionList = Enum.zip([xRangeList, yRangeList])
 
-      acc = Enum.reduce(positionList, acc, fn key, acc ->
+      Enum.reduce(positionList, acc, fn key, acc ->
           Map.put(acc, key, Map.get(acc, key, 0) + 1)
       end)
     end)
@@ -73,7 +73,7 @@ defmodule Day5 do
   def countLargerThan(generatedVentMap, count) do
     generatedVentMap
     |> Enum.filter(fn {_, v} ->
-      v >= 2
+      v >= count
     end)
     |> Enum.reduce(0, fn _e, acc -> acc + 1 end)
   end
